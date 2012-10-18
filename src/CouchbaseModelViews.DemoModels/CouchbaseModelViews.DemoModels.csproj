@@ -2,20 +2,18 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{4060D238-677D-406F-AC68-DAF4D1E975B8}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{6FF9A3F5-2B48-4308-9394-BD8A4F603D0A}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CouchbaseModelViewsGenerator</RootNamespace>
-    <AssemblyName>CouchbaseModelViewsGenerator</AssemblyName>
+    <RootNamespace>CouchbaseModelViews.DemoModels</RootNamespace>
+    <AssemblyName>CouchbaseModelViews.DemoModels</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,8 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -34,20 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Couchbase">
-      <HintPath>..\..\lib\Couchbase-1.2\Couchbase.dll</HintPath>
-    </Reference>
-    <Reference Include="Enyim.Caching">
-      <HintPath>..\..\lib\Couchbase-1.2\Enyim.Caching.dll</HintPath>
-    </Reference>
-    <Reference Include="Hammock">
-      <HintPath>..\..\lib\Couchbase-1.2\Hammock.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\lib\Couchbase-1.2\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -56,23 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ViewBuilder.cs" />
-    <Compile Include="ConfigParser.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Beer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CouchbaseModelViews.DemoModels\CouchbaseModelViews.DemoModels.csproj">
-      <Project>{6FF9A3F5-2B48-4308-9394-BD8A4F603D0A}</Project>
-      <Name>CouchbaseModelViews.DemoModels</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CouchbaseModelViews.Framework\CouchbaseModelViews.Framework.csproj">
       <Project>{52F76009-A9C3-4B21-955A-6DBE4853C36C}</Project>
       <Name>CouchbaseModelViews.Framework</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

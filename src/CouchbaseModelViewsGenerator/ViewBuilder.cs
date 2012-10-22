@@ -80,33 +80,30 @@ namespace CouchbaseModelViewsGenerator
                     }
                 }
                 
-                Console.WriteLine(jObject.ToString());
+                _designDocs[type] = jObject.ToString();
             }
         }
 
         private string getFunction(List<string> values)
         {
-            var template = "function(doc, meta) {{ emit({0}, null); }}";
+            var template = "function(doc, meta) {{ \r\n\t if ({0}) {{ \r\n\t\t emit({1}, null); \r\n\t }} \r\n }}";
 
-            var retval = "";
+            var keysToEmit = "[{0}]";
+			var keysToCheck = "{0}";
             if (values.Count == 1)
             {
-                retval = "doc." + values[0];
+                keysToCheck = keysToEmit = "doc." + values[0];
             }
             else
             {
-                var keys = values.Select(s => "doc." + s);
+				var keys = string.Join(" && ", values.Select(s => "doc." + s));
+				keysToCheck = string.Format(keysToCheck, keys);
 
-                retval = "[";
-                foreach (var key in keys)
-                {
-                    retval += key + ",";
-                }
-                retval = retval.Remove(retval.Length-1);
-                retval += "]";
+				keys = string.Join(", ", values.Select(s => "doc." + s));
+				keysToEmit = string.Format(keysToEmit, keys);				
             }
 
-            return string.Format(template, retval);
+            return string.Format(template, keysToCheck, keysToEmit);
         }
     }
 }

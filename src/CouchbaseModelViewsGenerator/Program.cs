@@ -14,7 +14,9 @@ namespace CouchbaseModelViewsGenerator
             var assemblies = ConfigParser.GetAssemblies();
             var builder = new ViewBuilder();
             builder.AddAssemblies(assemblies.ToList());
-            builder.Build();
+            var designDocs = builder.Build();
+			var ddManager = new DesignDocManager();
+			ddManager.Create(designDocs, (s) => Console.WriteLine(s));			
         }
     }
 }

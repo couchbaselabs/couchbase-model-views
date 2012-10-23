@@ -32,13 +32,16 @@ namespace CouchbaseModelViews.Framework
 {
 	public class DesignDocManager
 	{
-		private readonly static CouchbaseClientSection _config;
-		private readonly static CouchbaseCluster _cluster;
-
-		static DesignDocManager()
+		private static CouchbaseClientSection _config;
+		private static CouchbaseCluster _cluster;
+		
+		public DesignDocManager(string sectionName = "couchbase")
 		{
-			_config = ConfigurationManager.GetSection("couchbase") as CouchbaseClientSection;
-			_cluster = new CouchbaseCluster(_config);
+			if (_cluster == null)
+			{
+				_config = ConfigurationManager.GetSection(sectionName) as CouchbaseClientSection;
+				_cluster = new CouchbaseCluster(_config);
+			}
 		}
 
 		public void Create(string designDocName, string designDoc, Action<string> callback = null)

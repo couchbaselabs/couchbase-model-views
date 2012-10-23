@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Configuration;
 using System.Collections;
+using CouchbaseModelViews.Framework;
 
 namespace CouchbaseModelViewsGenerator
 {

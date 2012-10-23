@@ -7,20 +7,21 @@ Usage (Models)
 =====================
 
 Reference Couchbase.ModelViews.Framework in your models project.  Decorate the class with the name of the design doc.  
-Decorate properties wih the name of the views to which they should be keys.
+Decorate properties with the name of the views to which they should be keys.  Optionally, include the order in which 
+the properties should be emitted.  
 
     [CouchbaseDesignDoc("beers")]
     public class Beer
 	  {
   		public string Id { get; set; }
   
-  		[CouchbaseViewKey("by_name_and_abv", "name")]
+  		[CouchbaseViewKey("by_abv_and_name", "name", 1)]
   		[CouchbaseViewKey("by_name", "name")]
   		public string Name { get; set; }
   
   		public string Description { get; set; }
   
-  		[CouchbaseViewKey("by_name_and_abv", "abv")]
+  		[CouchbaseViewKey("by_abv_and_name", "abv", 0)]
   		public float ABV { get; set; }
   
   		[CouchbaseViewKey("by_brewery", "breweryId")]

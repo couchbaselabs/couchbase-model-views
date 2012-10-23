@@ -24,8 +24,8 @@ namespace CouchbaseModelViews.DemoModels
 		[CouchbaseViewKey("by_abv_and_name", "abv", 0)]
 		public float ABV { get; set; }
 
-		[JsonProperty("breweryId")]
-		[CouchbaseViewKey("by_brewery", "breweryId")]
+		[JsonProperty("brewery_id")]
+		[CouchbaseViewKey("by_brewery", "brewery_id")]
 		public string Brewery { get; set; }
 	}
 }

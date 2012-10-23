@@ -11,13 +11,13 @@ namespace CouchbaseModelViews.DemoModels
 	{
 		public string Id { get; set; }
 
-		[CouchbaseViewKey("by_name_and_abv", "name")]
+		[CouchbaseViewKey("by_abv_and_name", "name", 1)]
 		[CouchbaseViewKey("by_name", "name")]
 		public string Name { get; set; }
 
 		public string Description { get; set; }
 
-		[CouchbaseViewKey("by_name_and_abv", "abv")]
+		[CouchbaseViewKey("by_abv_and_name", "abv", 0)]
 		public float ABV { get; set; }
 
 		[CouchbaseViewKey("by_brewery", "breweryId")]

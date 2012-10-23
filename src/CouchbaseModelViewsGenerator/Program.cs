@@ -16,7 +16,7 @@ namespace CouchbaseModelViewsGenerator
             builder.AddAssemblies(assemblies.ToList());
             var designDocs = builder.Build();
 			var ddManager = new DesignDocManager();
-			ddManager.Create(designDocs, (s) => Console.WriteLine(s));			
+			ddManager.Create(designDocs, (s) => Console.WriteLine("Created {0} design doc", s));
         }
     }
 }

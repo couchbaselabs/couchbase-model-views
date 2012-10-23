@@ -32,35 +32,43 @@ namespace CouchbaseModelViewsGenerator
 
         private void buildTypes()
         {
-            foreach (var assembly in _assemblies)
-                foreach (var type in assembly.GetTypes())
-                {
-                    var typesAndViews = new Dictionary<string, Dictionary<string, List<string>>>();
+			foreach (var assembly in _assemblies)
+			{
+				foreach (var type in assembly.GetTypes())
+				{
+					var typesAndViews = new Dictionary<string, Dictionary<string, List<string>>>();
 
-                    var designDoc = "";
-                    foreach (CouchbaseDesignDocAttribute attribute in type.GetCustomAttributes(true).Where(a => a is CouchbaseDesignDocAttribute))
-                    {
-                        designDoc = string.IsNullOrEmpty(attribute.Name) ? type.Name.ToLower() : attribute.Name;
-                        typesAndViews[designDoc] = new Dictionary<string, List<string>>();
-                    }
+					var designDoc = "";
+					foreach (CouchbaseDesignDocAttribute attribute in type.GetCustomAttributes(true).Where(a => a is CouchbaseDesignDocAttribute))
+					{
+						designDoc = string.IsNullOrEmpty(attribute.Name) ? type.Name.ToLower() : attribute.Name;
+						typesAndViews[designDoc] = new Dictionary<string, List<string>>();
+					}
 
-                    foreach (var prop in type.GetProperties())
-                    {                        
-                        foreach (CouchbaseViewKeyAttribute attr in prop.GetCustomAttributes(typeof(CouchbaseViewKeyAttribute), true))
-                        {
-                            var viewName = attr.ViewName;
-                            if (!typesAndViews[designDoc].ContainsKey(viewName))
-                            {
-                                typesAndViews[designDoc][viewName] = new List<string>();
-                            }
+					var orderedViewNames = new List<Tuple<string, CouchbaseViewKeyAttribute>>();
 
-                            var propName = string.IsNullOrEmpty(attr.PropertyName) ? prop.Name : attr.PropertyName;
-                            typesAndViews[designDoc][viewName].Add(propName);
-                        }
-                    }
+					foreach (var prop in type.GetProperties())
+					{
+						foreach (CouchbaseViewKeyAttribute attr in prop.GetCustomAttributes(typeof(CouchbaseViewKeyAttribute), true))
+						{
+							if (!typesAndViews[designDoc].ContainsKey(attr.ViewName))
+							{
+								typesAndViews[designDoc][attr.ViewName] = new List<string>();
+							}
 
-                    buildJson(typesAndViews);   
-                }
+							var propName = string.IsNullOrEmpty(attr.PropertyName) ? prop.Name : attr.PropertyName;
+							orderedViewNames.Add(Tuple.Create(propName, attr));
+						}						
+					}
+
+					foreach (var attr in orderedViewNames.OrderBy(a => a.Item2.ViewName).ThenBy(a => a.Item2.Order))
+					{
+						typesAndViews[designDoc][attr.Item2.ViewName].Add(attr.Item1);
+					}
+					
+					buildJson(typesAndViews);
+				}
+			} 
         }
 
         private void buildJson(Dictionary<string, Dictionary<string, List<string>>> typesAndViews)

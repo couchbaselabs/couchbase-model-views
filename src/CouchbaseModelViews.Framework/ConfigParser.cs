@@ -14,9 +14,9 @@ namespace CouchbaseModelViews.Framework
         {
             var assemblies = ConfigurationManager.GetSection("modelViews/assemblies") as IDictionary;
 
-            foreach (DictionaryEntry ass in assemblies)
+            foreach (DictionaryEntry assembly in assemblies)
             {
-                yield return Assembly.Load(ass.Value as string);
+                yield return Assembly.Load(assembly.Value as string);
             }
         }
     }

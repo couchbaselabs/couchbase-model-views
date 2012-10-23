@@ -44,6 +44,14 @@ namespace CouchbaseModelViews.Framework
 			}
 		}
 
+		public DesignDocManager(CouchbaseClientConfiguration config)
+		{
+			if (_cluster == null)
+			{
+				_cluster = new CouchbaseCluster(config);
+			}
+		}
+
 		public void Create(string designDocName, string designDoc, Action<string> callback = null)
 		{
 			var doc = "";

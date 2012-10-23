@@ -10,9 +10,12 @@ namespace CouchbaseModelViews.Framework.Attributes
     {
         public string Name { get; set; }
 
-        public CouchbaseDesignDocAttribute(string name)
+		public string Type { get; set; }
+
+        public CouchbaseDesignDocAttribute(string name, string type = "")
         {
             Name = name;
+			Type = type;
         }
     }
 }

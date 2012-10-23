@@ -36,24 +36,27 @@ namespace CouchbaseModelViews.Framework
 			{
 				foreach (var type in assembly.GetTypes())
 				{
-					var typesAndViews = new Dictionary<string, Dictionary<string, List<string>>>();
+					var typesAndViews = new Dictionary<Tuple<string, string>, Dictionary<string, List<string>>>();
 
 					var designDoc = "";
+					var typeName = "";
 					foreach (CouchbaseDesignDocAttribute attribute in type.GetCustomAttributes(true).Where(a => a is CouchbaseDesignDocAttribute))
 					{
 						designDoc = string.IsNullOrEmpty(attribute.Name) ? type.Name.ToLower() : attribute.Name;
-						typesAndViews[designDoc] = new Dictionary<string, List<string>>();
+						typeName = string.IsNullOrEmpty(attribute.Type) ? type.Name.ToLower() : attribute.Type;
+						typesAndViews[Tuple.Create(typeName, designDoc)] = new Dictionary<string, List<string>>();
 					}
 
+					var key = Tuple.Create(typeName, designDoc);
 					var orderedViewNames = new List<Tuple<string, CouchbaseViewKeyAttribute>>();
 
 					foreach (var prop in type.GetProperties())
 					{
 						foreach (CouchbaseViewKeyAttribute attr in prop.GetCustomAttributes(typeof(CouchbaseViewKeyAttribute), true))
 						{
-							if (!typesAndViews[designDoc].ContainsKey(attr.ViewName))
+							if (!typesAndViews[key].ContainsKey(attr.ViewName))
 							{
-								typesAndViews[designDoc][attr.ViewName] = new List<string>();
+								typesAndViews[key][attr.ViewName] = new List<string>();
 							}
 
 							var propName = string.IsNullOrEmpty(attr.PropertyName) ? prop.Name : attr.PropertyName;
@@ -63,7 +66,7 @@ namespace CouchbaseModelViews.Framework
 
 					foreach (var attr in orderedViewNames.OrderBy(a => a.Item2.ViewName).ThenBy(a => a.Item2.Order))
 					{
-						typesAndViews[designDoc][attr.Item2.ViewName].Add(attr.Item1);
+						typesAndViews[key][attr.Item2.ViewName].Add(attr.Item1);
 					}
 					
 					buildJson(typesAndViews);
@@ -71,7 +74,7 @@ namespace CouchbaseModelViews.Framework
 			} 
         }
 
-        private void buildJson(Dictionary<string, Dictionary<string, List<string>>> typesAndViews)
+        private void buildJson(Dictionary<Tuple<string, string>, Dictionary<string, List<string>>> typesAndViews)
         {
             foreach (var type in typesAndViews.Keys)
             {
@@ -83,16 +86,16 @@ namespace CouchbaseModelViews.Framework
                     foreach (var key in value.Keys)
                     {
                         var map = new JObject();
-                        map["map"] = getFunction(value[key]);
+                        map["map"] = getFunction(type.Item1, value[key]);
                         jObject["views"][key] = map;
                     }
                 }
                 
-                _designDocs[type] = jObject.ToString();
+                _designDocs[type.Item2] = jObject.ToString();
             }
         }
 
-        private string getFunction(List<string> values)
+        private string getFunction(string type, List<string> values)
         {
             var template = "function(doc, meta) {{ \r\n\t if ({0}) {{ \r\n\t\t emit({1}, null); \r\n\t }} \r\n }}";
 
@@ -111,7 +114,8 @@ namespace CouchbaseModelViews.Framework
 				keysToEmit = string.Format(keysToEmit, keys);				
             }
 
-            return string.Format(template, keysToCheck, keysToEmit);
+			var condition = "doc.type == \"" + type + "\" && " + keysToCheck;
+            return string.Format(template, condition, keysToEmit);
         }
     }
 }

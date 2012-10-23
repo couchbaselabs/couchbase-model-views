@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace CouchbaseModelViews.DemoModels
 {
-	[CouchbaseDesignDoc("beers")]
+	[CouchbaseDesignDoc("beers", "beer")]
 	public class Beer
 	{
 		public string Id { get; set; }

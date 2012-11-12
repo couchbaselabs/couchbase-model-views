@@ -23,19 +23,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CouchbaseModelViews.Framework.Attributes;
 
-namespace CouchbaseModelViews.DemoModels
+namespace CouchbaseModelViews.Framework
 {
-	[CouchbaseDesignDoc("breweries")]
-	[CouchbaseAllView]
-	public class Brewery 
+	public class DesignDocDefinition
 	{
-		public string Id { get; set; }
-		
-		[CouchbaseViewKey("by_name", "name")]
+		/// <summary>
+		/// Name of view
+		/// </summary>
 		public string Name { get; set; }
 
-		public string Description { get; set; }		
+		/// <summary>
+		/// Used for type checking to filter documents
+		/// </summary>
+		public string Type { get; set; }
+
+		/// <summary>
+		/// When true, include null index/value for given type
+		/// </summary>
+		public bool ShouldIncludeAllView { get; set; }
+
+		/// <summary>
+		/// List of view names and key properties
+		/// </summary>
+		public IList<ViewDefinition> Views { get; set; }
 	}
 }

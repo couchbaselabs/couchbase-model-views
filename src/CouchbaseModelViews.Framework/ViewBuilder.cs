@@ -32,6 +32,8 @@ namespace CouchbaseModelViews.Framework
 {
     public class ViewBuilder
     {
+		private const string MAP_TEMPLATE = "function(doc, meta) {{ \r\n\t if ({0}) {{ \r\n\t\t emit({1}, null); \r\n\t }} \r\n }}";
+
         private IList<Assembly> _assemblies = new List<Assembly>();
         private IDictionary<string, string> _designDocs = new Dictionary<string, string>();
 
@@ -57,16 +59,22 @@ namespace CouchbaseModelViews.Framework
 			{
 				foreach (var type in assembly.GetTypes())
 				{
-					var typesAndViews = new Dictionary<Tuple<string, string>, Dictionary<string, List<string>>>();
+					var designDocDefinition = new DesignDocDefinition();
 
 					var designDoc = "";
 					var typeName = "";
+
 					foreach (CouchbaseDesignDocAttribute attribute in type.GetCustomAttributes(true).Where(a => a is CouchbaseDesignDocAttribute))
 					{
 						designDoc = string.IsNullOrEmpty(attribute.Name) ? type.Name.ToLower() : attribute.Name;
 						typeName = string.IsNullOrEmpty(attribute.Type) ? type.Name.ToLower() : attribute.Type;
-						typesAndViews[Tuple.Create(typeName, designDoc)] = new Dictionary<string, List<string>>();
+
+						designDocDefinition.Name = designDoc;
+						designDocDefinition.Type = typeName;
+						designDocDefinition.Views = new List<ViewDefinition>();
 					}
+
+					designDocDefinition.ShouldIncludeAllView = type.GetCustomAttributes(true).Where(a => a is CouchbaseAllView).FirstOrDefault() != null;
 
 					var key = Tuple.Create(typeName, designDoc);
 					var orderedViewNames = new List<Tuple<string, CouchbaseViewKeyAttribute>>();
@@ -75,68 +83,69 @@ namespace CouchbaseModelViews.Framework
 					{
 						foreach (CouchbaseViewKeyAttribute attr in prop.GetCustomAttributes(typeof(CouchbaseViewKeyAttribute), true))
 						{
-							if (!typesAndViews[key].ContainsKey(attr.ViewName))
-							{
-								typesAndViews[key][attr.ViewName] = new List<string>();
-							}
-
 							var propName = string.IsNullOrEmpty(attr.PropertyName) ? prop.Name : attr.PropertyName;
 							orderedViewNames.Add(Tuple.Create(propName, attr));
+
+							if (designDocDefinition.Views.FirstOrDefault(v => v.Name == attr.ViewName) == null)
+							{
+								designDocDefinition.Views.Add(new ViewDefinition() { Name = attr.ViewName });
+							}
 						}						
 					}
 
 					foreach (var attr in orderedViewNames.OrderBy(a => a.Item2.ViewName).ThenBy(a => a.Item2.Order))
 					{
-						typesAndViews[key][attr.Item2.ViewName].Add(attr.Item1);
+						designDocDefinition.Views.FirstOrDefault(v => v.Name == attr.Item2.ViewName).KeyProperties.Add(attr.Item1);						
 					}
-					
-					buildJson(typesAndViews);
+
+					buildJson(designDocDefinition);
 				}
 			} 
         }
 
-        private void buildJson(Dictionary<Tuple<string, string>, Dictionary<string, List<string>>> typesAndViews)
+        private void buildJson(DesignDocDefinition designDocDefinition)
         {
-            foreach (var type in typesAndViews.Keys)
-            {
-                var jObject = new JObject();
-                jObject["views"] = new JObject();
+            var jObject = new JObject();
+            jObject["views"] = new JObject();
 
-                foreach (var value in typesAndViews.Values)
-                {
-                    foreach (var key in value.Keys)
-                    {
-                        var map = new JObject();
-                        map["map"] = getFunction(type.Item1, value[key]);
-                        jObject["views"][key] = map;
-                    }
-                }
-                
-                _designDocs[type.Item2] = jObject.ToString();
+			if (designDocDefinition.ShouldIncludeAllView)
+			{
+				var map = new JObject();
+				map["map"] = getFunction(designDocDefinition.Type, new List<string>{"null"});
+				jObject["views"]["all"] = map;
+			}
+
+            foreach (var view in designDocDefinition.Views)
+            {
+                var map = new JObject();
+                map["map"] = getFunction(designDocDefinition.Type, view.KeyProperties, "doc.");
+                jObject["views"][view.Name] = map;
             }
+
+			_designDocs[designDocDefinition.Name] = jObject.ToString();
         }
 
-        private string getFunction(string type, List<string> values)
+        private string getFunction(string type, IList<string> values, string docPrefix = null)
         {
-            var template = "function(doc, meta) {{ \r\n\t if ({0}) {{ \r\n\t\t emit({1}, null); \r\n\t }} \r\n }}";
-
             var keysToEmit = "[{0}]";
 			var keysToCheck = "{0}";
-            if (values.Count == 1)
-            {
-                keysToCheck = keysToEmit = "doc." + values[0];
-            }
-            else
-            {
-				var keys = string.Join(" && ", values.Select(s => "doc." + s));
+
+			if (values.Count == 1)
+			{
+				keysToCheck = keysToEmit = docPrefix + values[0];
+			}
+			else
+			{
+				var keys = string.Join(" && ", values.Select(s => docPrefix + s));
 				keysToCheck = string.Format(keysToCheck, keys);
 
-				keys = string.Join(", ", values.Select(s => "doc." + s));
-				keysToEmit = string.Format(keysToEmit, keys);				
-            }
+				keys = string.Join(", ", values.Select(s => docPrefix + s));
+				keysToEmit = string.Format(keysToEmit, keys);
+			}
 
-			var condition = "doc.type == \"" + type + "\" && " + keysToCheck;
-            return string.Format(template, condition, keysToEmit);
+			var condition = "doc.type == \"" + type + "\"";
+			if (docPrefix != null) condition += " && " + keysToCheck;
+            return string.Format(MAP_TEMPLATE, condition, keysToEmit);
         }
     }
 }

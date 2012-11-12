@@ -31,20 +31,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Couchbase">
-      <HintPath>..\packages\CouchbaseNetClient.1.2.0-beta\lib\net40\Couchbase.dll</HintPath>
+    <Reference Include="Couchbase, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Couchbase-1.2\Couchbase.dll</HintPath>
     </Reference>
-    <Reference Include="Enyim.Caching">
-      <HintPath>..\packages\CouchbaseNetClient.1.2.0-beta\lib\net40\Enyim.Caching.dll</HintPath>
+    <Reference Include="Enyim.Caching, Version=2.12.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\lib\Couchbase-1.2\Enyim.Caching.dll</HintPath>
     </Reference>
-    <Reference Include="Hammock">
-      <HintPath>..\packages\Hammock.1.2.9\lib\4.0\Hammock.dll</HintPath>
+    <Reference Include="Hammock, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c148cfba29ed1a4d, processorArchitecture=MSIL">
+      <HintPath>..\..\lib\Couchbase-1.2\Hammock.dll</HintPath>
     </Reference>
-    <Reference Include="Hammock.ClientProfile">
-      <HintPath>..\packages\Hammock.1.2.9\lib\4.0\Hammock.ClientProfile.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.4.5.10\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\lib\Couchbase-1.2\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -57,11 +55,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\CouchbaseDesignDocAttribute.cs" />
+    <Compile Include="Attributes\CouchbaseAllView.cs" />
     <Compile Include="Attributes\CouchbaseViewKeyAttribute.cs" />
     <Compile Include="ConfigParser.cs" />
     <Compile Include="DesignDocManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewBuilder.cs" />
+    <Compile Include="DesignDocDefinition.cs" />
+    <Compile Include="ViewDefinition.cs" />
     <Compile Include="ViewRunner.cs" />
   </ItemGroup>
   <ItemGroup>

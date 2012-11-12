@@ -23,19 +23,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CouchbaseModelViews.Framework.Attributes;
 
-namespace CouchbaseModelViews.DemoModels
+namespace CouchbaseModelViews.Framework
 {
-	[CouchbaseDesignDoc("breweries")]
-	[CouchbaseAllView]
-	public class Brewery 
+	public class ViewDefinition
 	{
-		public string Id { get; set; }
-		
-		[CouchbaseViewKey("by_name", "name")]
+		/// <summary>
+		/// Name of map function
+		/// </summary>
 		public string Name { get; set; }
 
-		public string Description { get; set; }		
+		private List<string> _keyProperties = new List<string>();
+
+		/// <summary>
+		/// Key(s) to be included in index
+		/// </summary>
+		public IList<string> KeyProperties { get { return _keyProperties; } }
 	}
 }

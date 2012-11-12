@@ -23,19 +23,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CouchbaseModelViews.Framework.Attributes;
 
-namespace CouchbaseModelViews.DemoModels
+namespace CouchbaseModelViews.Framework.Attributes
 {
-	[CouchbaseDesignDoc("breweries")]
-	[CouchbaseAllView]
-	public class Brewery 
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+	public class CouchbaseAllView : Attribute
 	{
-		public string Id { get; set; }
-		
-		[CouchbaseViewKey("by_name", "name")]
-		public string Name { get; set; }
-
-		public string Description { get; set; }		
+		public CouchbaseAllView()
+		{			
+		}
 	}
 }

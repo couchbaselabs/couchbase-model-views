@@ -11,6 +11,7 @@ Decorate properties with the name of the views to which they should be keys.  Op
 the properties should be emitted.  
 
     [CouchbaseDesignDoc("beers")]
+    [CouchbaseAllView]
     public class Beer
 	  {
   		public string Id { get; set; }
@@ -59,14 +60,17 @@ Run the console application.  The sample Beer class above will produce the follo
 
     {
       "views": {
+        "all": {
+          "map": "function(doc, meta) { \r\n\t if (doc.type == \"beer\") { \r\n\t\t emit(null, null); \r\n\t } \r\n }"        
+        },
         "by_name_and_abv": {
-          "map": "function(doc, meta) { \r\n\t if (doc.name && doc.abv) { \r\n\t\t emit([doc.name, doc.abv], null); \r\n\t } \r\n }"
+          "map": "function(doc, meta) { \r\n\t if (doc.type == \"beer\" && doc.name && doc.abv) { \r\n\t\t emit([doc.name, doc.abv], null); \r\n\t } \r\n }"
         },
         "by_name": {
-          "map": "function(doc, meta) { \r\n\t if (doc.name) { \r\n\t\t emit(doc.name, null); \r\n\t } \r\n }"
+          "map": "function(doc, meta) { \r\n\t if (doc.type == \"beer\" && doc.name) { \r\n\t\t emit(doc.name, null); \r\n\t } \r\n }"
         },
         "by_brewery": {
-          "map": "function(doc, meta) { \r\n\t if (doc.breweryId) { \r\n\t\t emit(doc.breweryId, null); \r\n\t } \r\n }"
+          "map": "function(doc, meta) { \r\n\t if (doc.type == \"beer\" && doc.breweryId) { \r\n\t\t emit(doc.breweryId, null); \r\n\t } \r\n }"
         }
       }
     }

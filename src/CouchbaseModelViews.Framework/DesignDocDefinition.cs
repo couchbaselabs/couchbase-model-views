@@ -43,9 +43,11 @@ namespace CouchbaseModelViews.Framework
 		/// </summary>
 		public bool ShouldIncludeAllView { get; set; }
 
+		private List<ViewDefinition> _views = new List<ViewDefinition>();
+
 		/// <summary>
 		/// List of view names and key properties
 		/// </summary>
-		public IList<ViewDefinition> Views { get; set; }
+		public IList<ViewDefinition> Views { get { return _views; } }
 	}
 }

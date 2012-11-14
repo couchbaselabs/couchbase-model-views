@@ -64,14 +64,19 @@ namespace CouchbaseModelViews.Framework
 					var designDoc = "";
 					var typeName = "";
 
-					foreach (CouchbaseDesignDocAttribute attribute in type.GetCustomAttributes(true).Where(a => a is CouchbaseDesignDocAttribute))
+					var designDocAttr = type.GetCustomAttributes(true).Where(a => a is CouchbaseDesignDocAttribute).FirstOrDefault() as CouchbaseDesignDocAttribute;
+
+					if (designDocAttr != null)
 					{
-						designDoc = string.IsNullOrEmpty(attribute.Name) ? type.Name.ToLower() : attribute.Name;
-						typeName = string.IsNullOrEmpty(attribute.Type) ? type.Name.ToLower() : attribute.Type;
+						designDoc = string.IsNullOrEmpty(designDocAttr.Name) ? type.Name.ToLower() : designDocAttr.Name;
+						typeName = string.IsNullOrEmpty(designDocAttr.Type) ? type.Name.ToLower() : designDocAttr.Type;
 
 						designDocDefinition.Name = designDoc;
 						designDocDefinition.Type = typeName;
-						designDocDefinition.Views = new List<ViewDefinition>();
+					}
+					else
+					{
+						continue;
 					}
 
 					designDocDefinition.ShouldIncludeAllView = type.GetCustomAttributes(true).Where(a => a is CouchbaseAllView).FirstOrDefault() != null;

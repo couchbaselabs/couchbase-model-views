@@ -26,14 +26,16 @@ using System.Text;
 
 namespace CouchbaseModelViews.Framework.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple=true)]
-    public class CouchbaseViewKeyAttribute : CouchbaseViewKeyAttributeBase
-    {
-		public CouchbaseViewKeyAttribute(string viewName, string propertyName = "", int order = 0)
-		{
-			PropertyName = propertyName;
-			ViewName = viewName;
-			Order = order;
-		}
-    }
+	/// <summary>
+	/// Marker interface for use with generic constraints or inheritance checks
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+	public abstract class CouchbaseViewKeyAttributeBase : Attribute
+	{
+		public int Order { get; set; }
+
+		public string ViewName { get; set; }
+
+		public string PropertyName { get; set; }
+	}
 }

@@ -24,16 +24,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace CouchbaseModelViews.Framework.Attributes
+namespace CouchbaseModelViews.Framework
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple=true)]
-    public class CouchbaseViewKeyAttribute : CouchbaseViewKeyAttributeBase
-    {
-		public CouchbaseViewKeyAttribute(string viewName, string propertyName = "", int order = 0)
-		{
-			PropertyName = propertyName;
-			ViewName = viewName;
-			Order = order;
-		}
-    }
+	public class SpatialViewDefinition
+	{
+		/// <summary>
+		/// Name of map function
+		/// </summary>
+		public string Name { get; set; }
+
+		private List<string> _coordinateProperties = new List<string>();
+
+		/// <summary>
+		/// Key(s) to be included in index
+		/// </summary>
+		public IList<string> CoordinateProperties { get { return _coordinateProperties; } }
+	}
 }

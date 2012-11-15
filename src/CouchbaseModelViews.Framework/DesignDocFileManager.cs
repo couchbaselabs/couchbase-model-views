@@ -23,17 +23,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
-namespace CouchbaseModelViews.Framework.Attributes
+namespace CouchbaseModelViews.Framework
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple=true)]
-    public class CouchbaseViewKeyAttribute : CouchbaseViewKeyAttributeBase
-    {
-		public CouchbaseViewKeyAttribute(string viewName, string propertyName = "", int order = 0)
+	public class DesignDocFileManager
+	{
+		public void Create(string directory, IDictionary<string, string> designDocs)
 		{
-			PropertyName = propertyName;
-			ViewName = viewName;
-			Order = order;
+			foreach (var key in designDocs.Keys)
+			{
+				var path = Path.Combine(directory, key + ".json");
+				using (var sr = new StreamWriter(path, false))
+				{
+					sr.Write(designDocs[key]);
+				}
+			}
 		}
-    }
+	}
 }

@@ -39,6 +39,8 @@ namespace CouchbaseModelViewsGenerator
             var designDocs = builder.Build();
 			var ddManager = new DesignDocManager();
 			ddManager.Create(designDocs, (s) => Console.WriteLine("Created {0} design doc", s));
+			var ddfManager = new DesignDocFileManager();
+			ddfManager.Create(Environment.CurrentDirectory, designDocs);
 			var runner = new ViewRunner();
 			runner.Run(designDocs, (k, v, s) => Console.WriteLine("[{0}::{1}] Key {2}", k, v, s["key"]), 5);
         }

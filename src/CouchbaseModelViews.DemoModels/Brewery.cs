@@ -36,6 +36,12 @@ namespace CouchbaseModelViews.DemoModels
 		[CouchbaseViewKey("by_name", "name")]
 		public string Name { get; set; }
 
-		public string Description { get; set; }		
+		public string Description { get; set; }
+
+		[CouchbaseSpatialViewKey("by_location", "geo.lng", 0)]
+		public float Longitude { get; set; }
+
+		[CouchbaseSpatialViewKey("by_location", "geo.lat", 1)]
+		public float Latitude { get; set; }
 	}
 }

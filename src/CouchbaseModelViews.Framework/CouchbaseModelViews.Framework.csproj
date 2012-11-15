@@ -56,10 +56,14 @@
   <ItemGroup>
     <Compile Include="Attributes\CouchbaseDesignDocAttribute.cs" />
     <Compile Include="Attributes\CouchbaseAllView.cs" />
+    <Compile Include="Attributes\CouchbaseSpatialViewKeyAttribute.cs" />
     <Compile Include="Attributes\CouchbaseViewKeyAttribute.cs" />
+    <Compile Include="Attributes\CouchbaseViewKeyAttributeBase.cs" />
     <Compile Include="ConfigParser.cs" />
+    <Compile Include="DesignDocFileManager.cs" />
     <Compile Include="DesignDocManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpatialViewDefinition.cs" />
     <Compile Include="ViewBuilder.cs" />
     <Compile Include="DesignDocDefinition.cs" />
     <Compile Include="ViewDefinition.cs" />

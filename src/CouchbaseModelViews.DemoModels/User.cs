@@ -23,17 +23,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CouchbaseModelViews.Framework.Attributes;
 
-namespace CouchbaseModelViews.Framework.Attributes
+namespace CouchbaseModelViews.DemoModels
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple=true)]
-    public class CouchbaseViewKeyAttribute : CouchbaseViewKeyAttributeBase
-    {
-		public CouchbaseViewKeyAttribute(string viewName, string propertyName = "", int order = 0)
-		{
-			PropertyName = propertyName;
-			ViewName = viewName;
-			Order = order;
-		}
-    }
+	[CouchbaseDesignDoc("users", "user")]
+	[CouchbaseAllView]
+	public class User
+	{
+		[CouchbaseViewKey("by_email_and_password", "email", 0)]
+		public string Email { get; set; }
+
+		[CouchbaseViewKey("by_email_and_password", "password", 1)]
+		public string Password { get; set; }
+
+		private float[] _location = new float[2];
+
+		[CouchbaseSpatialViewKey("by_location", "location")]
+		public float[] Location { get { return _location; } }
+	}
 }

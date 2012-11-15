@@ -49,5 +49,12 @@ namespace CouchbaseModelViews.Framework
 		/// List of view names and key properties
 		/// </summary>
 		public IList<ViewDefinition> Views { get { return _views; } }
+
+		private List<SpatialViewDefinition> _spatialViews = new List<SpatialViewDefinition>();
+
+		/// <summary>
+		/// List of spatial view names and coordinate properties
+		/// </summary>
+		public IList<SpatialViewDefinition> SpatialViews { get { return _spatialViews; } }
 	}
 }

@@ -28,6 +28,24 @@ the properties should be emitted.
   		[CouchbaseViewKey("by_brewery", "breweryId")]
   		public string Brewery { get; set; }
 	  }
+
+    [CouchbaseDesignDoc("beers")]
+    [CouchbaseAllView]
+    public class Brewery
+	  {
+  		public string Id { get; set; }
+  
+  		[CouchbaseViewKey("by_name", "name")]
+  		public string Name { get; set; }
+  
+  		public string Description { get; set; }
+  
+		[CouchbaseSpatialView("by_location", "geo.lng", 0)]
+		public float Longitude { get; set; }
+  		
+		[CouchbaseSpatialView("by_location", "geo.lat", 1)]
+  		public float Latitude { get; set; }  		
+	  }
     
 Usage (Console App)
 =====================

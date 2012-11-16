@@ -26,6 +26,8 @@ using System.Text;
 
 namespace CouchbaseModelViews.Framework
 {
+	public enum ReduceOptions { None, Count, Sum };
+
 	public class ViewDefinition
 	{
 		/// <summary>
@@ -39,5 +41,15 @@ namespace CouchbaseModelViews.Framework
 		/// Key(s) to be included in index
 		/// </summary>
 		public IList<string> KeyProperties { get { return _keyProperties; } }
+
+		/// <summary>
+		/// A string representing a built in reduce function
+		/// </summary>
+		public ReduceOptions Reduce { get; set; }
+
+		/// <summary>
+		/// The value to emit in the index, defaults to null
+		/// </summary>
+		public string Value { get; set; }
 	}
 }

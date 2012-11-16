@@ -32,7 +32,7 @@ namespace CouchbaseModelViews.Framework
 {
 	public class ViewBuilder
 	{
-		private const string VIEW_MAP_TEMPLATE = "function(doc, meta) {{ \r\n\t if ({0}) {{ \r\n\t\t emit({1}, null); \r\n\t }} \r\n }}";
+		private const string VIEW_MAP_TEMPLATE = "function(doc, meta) {{ \r\n\t if ({0}) {{ \r\n\t\t emit({1}, {2}); \r\n\t }} \r\n }}";
 		private const string SPATIAL_VIEW_MAP_TEMPLATE = "function (doc, meta) {{ if ({0}) {{ emit({{ \"type\": \"Point\", \"coordinates\": {1}}}, null); }} }}";
 
 		private IList<Assembly> _assemblies = new List<Assembly>();
@@ -88,12 +88,16 @@ namespace CouchbaseModelViews.Framework
 
 					handleViews<CouchbaseSpatialViewKeyAttribute>(typeName, designDoc, type, designDocDefinition);
 
+					handleViews<CouchbaseViewKeySumAttribute>(typeName, designDoc, type, designDocDefinition);
+
+					handleViews<CouchbaseViewKeyCountAttribute>(typeName, designDoc, type, designDocDefinition);
+
 					buildJson(designDocDefinition);
 				}
 			}
 		}
 
-		private void handleViews<T>(string typeName, string designDoc, Type type, DesignDocDefinition designDocDefinition) 
+		private void handleViews<T>(string typeName, string designDoc, Type type, DesignDocDefinition designDocDefinition)
 			where T : CouchbaseViewKeyAttributeBase
 		{
 			//spaial views
@@ -107,11 +111,26 @@ namespace CouchbaseModelViews.Framework
 					var propName = string.IsNullOrEmpty(attr.PropertyName) ? prop.Name : attr.PropertyName;
 					orderedViewNames.Add(Tuple.Create(propName, attr));
 
+					//TODO: refactor the copy & paste
 					if (typeof(T).IsAssignableFrom(typeof(CouchbaseViewKeyAttribute)))
 					{
 						if (designDocDefinition.Views.FirstOrDefault(v => v.Name == attr.ViewName) == null)
 						{
 							designDocDefinition.Views.Add(new ViewDefinition() { Name = attr.ViewName });
+						}
+					}
+					else if (typeof(T).IsAssignableFrom(typeof(CouchbaseViewKeyCountAttribute)))
+					{
+						if (designDocDefinition.Views.FirstOrDefault(v => v.Name == attr.ViewName) == null)
+						{
+							designDocDefinition.Views.Add(new ViewDefinition() { Name = attr.ViewName, Reduce = ReduceOptions.Count });
+						}
+					}
+					else if (typeof(T).IsAssignableFrom(typeof(CouchbaseViewKeySumAttribute)))
+					{
+						if (designDocDefinition.Views.FirstOrDefault(v => v.Name == attr.ViewName) == null)
+						{
+							designDocDefinition.Views.Add(new ViewDefinition() { Name = attr.ViewName, Reduce = ReduceOptions.Sum });
 						}
 					}
 					else if (typeof(T).IsAssignableFrom(typeof(CouchbaseSpatialViewKeyAttribute)))
@@ -129,6 +148,13 @@ namespace CouchbaseModelViews.Framework
 				if (typeof(T).IsAssignableFrom(typeof(CouchbaseViewKeyAttribute)))
 				{
 					designDocDefinition.Views.FirstOrDefault(v => v.Name == attr.Item2.ViewName).KeyProperties.Add(attr.Item1);
+				}
+				else if (typeof(T).IsAssignableFrom(typeof(CouchbaseViewKeySumAttribute)) ||
+						 typeof(T).IsAssignableFrom(typeof(CouchbaseViewKeyCountAttribute)))
+				{
+					var view = designDocDefinition.Views.FirstOrDefault(v => v.Name == attr.Item2.ViewName);
+					view.KeyProperties.Add(attr.Item1);
+					view.Value = (attr.Item2 as CouchbaseViewKeyReduceAttributeBase).Value;
 				}
 				else if (typeof(T).IsAssignableFrom(typeof(CouchbaseSpatialViewKeyAttribute)))
 				{
@@ -152,9 +178,31 @@ namespace CouchbaseModelViews.Framework
 
 			foreach (var view in designDocDefinition.Views)
 			{
-				var map = new JObject();
-				map["map"] = getViewFunction(designDocDefinition.Type, view.KeyProperties, VIEW_MAP_TEMPLATE, "doc.");
-				jObject["views"][view.Name] = map;
+				var mapReduce = new JObject();
+
+				if (view.Reduce != ReduceOptions.None)
+				{
+					switch (view.Reduce)
+					{
+						case ReduceOptions.Count:
+							mapReduce["reduce"] = "_count";
+							break;
+						case ReduceOptions.Sum:
+							mapReduce["reduce"] = "_sum";
+							break;
+						default:
+							break;
+					}
+
+					mapReduce["map"] = getViewFunction(designDocDefinition.Type, view.KeyProperties, VIEW_MAP_TEMPLATE, "doc.", view.Value);
+				}
+				else
+				{
+					mapReduce["map"] = getViewFunction(designDocDefinition.Type, view.KeyProperties, VIEW_MAP_TEMPLATE, "doc.");
+				}
+
+				jObject["views"][view.Name] = mapReduce;
+
 			}
 
 			foreach (var view in designDocDefinition.SpatialViews)
@@ -166,7 +214,7 @@ namespace CouchbaseModelViews.Framework
 			_designDocs[designDocDefinition.Name] = jObject.ToString();
 		}
 
-		private string getViewFunction(string type, IList<string> values, string template, string docPrefix = null)
+		private string getViewFunction(string type, IList<string> values, string template, string docPrefix = null, string value = "null")
 		{
 			var keysToEmit = "[{0}]";
 			var keysToCheck = "{0}";
@@ -186,7 +234,7 @@ namespace CouchbaseModelViews.Framework
 
 			var condition = "doc.type == \"" + type + "\"";
 			if (docPrefix != null) condition += " && " + keysToCheck;
-			return string.Format(template, condition, keysToEmit);
+			return string.Format(template, condition, keysToEmit, value);
 		}
 	}
 }

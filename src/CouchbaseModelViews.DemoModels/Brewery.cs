@@ -36,6 +36,13 @@ namespace CouchbaseModelViews.DemoModels
 		[CouchbaseViewKey("by_name", "name")]
 		public string Name { get; set; }
 
+		[CouchbaseViewKeySum("sum_by_state", "state")]
+		[CouchbaseViewKeyCount("count_by_state", "state", Order=0)]
+		public string State { get; set; }
+
+		[CouchbaseViewKeyCount("count_by_state", "city", Order = 1)]
+		public string City { get; set; }
+
 		public string Description { get; set; }
 
 		[CouchbaseSpatialViewKey("by_location", "geo.lng", 0)]

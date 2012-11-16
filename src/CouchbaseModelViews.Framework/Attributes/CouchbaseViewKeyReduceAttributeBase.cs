@@ -23,26 +23,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Configuration;
-using System.Collections;
-using CouchbaseModelViews.Framework;
+using CouchbaseModelViews.Framework.Attributes;
 
-namespace CouchbaseModelViewsGenerator
+namespace CouchbaseModelViews.Framework.Attributes
 {
-	class Program
+	public abstract class CouchbaseViewKeyReduceAttributeBase : CouchbaseViewKeyAttributeBase
 	{
-		static void Main(string[] args)
+		//TODO: Value will appear multiple times for composite key, but value isn't composite
+		public string Value { get; set; }
+
+		public CouchbaseViewKeyReduceAttributeBase(string viewName, string propertyName = "", int order = 0, string value = "1")
 		{
-			var assemblies = ConfigParser.GetAssemblies();
-			var builder = new ViewBuilder();
-			builder.AddAssemblies(assemblies.ToList());
-			var designDocs = builder.Build();
-			var ddManager = new DesignDocManager();
-			ddManager.Create(designDocs, (s) => Console.WriteLine("Created {0} design doc", s));
-			var ddfManager = new DesignDocFileManager();
-			ddfManager.Create(Environment.CurrentDirectory, designDocs);
-			var runner = new ViewRunner();
-			runner.Run(designDocs, (k, v, s) => Console.WriteLine("[{0}::{1}] Key {2}", k, v, s["key"]), 5);
+			ViewName = viewName;
+			PropertyName = propertyName;
+			Order = order;
+			Value = value;
 		}
 	}
 }

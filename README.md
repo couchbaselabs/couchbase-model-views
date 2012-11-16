@@ -1,7 +1,7 @@
 couchbase-model-views
 =====================
 
-Sample project demonstrating how to generate Couchbase Views with the CouchbaseClient and custom attributes on data objects
+Sample project demonstrating how to generate basic Couchbase Views with the CouchbaseClient and custom attributes on data objects
 
 Usage (Models)
 =====================
@@ -39,6 +39,9 @@ the properties should be emitted.
   		public string Name { get; set; }
   
   		public string Description { get; set; }
+  		
+  		[CouchbaseViewKeyCount("by_state", "state", 1)]
+  		public string State { get; set; }
   
 		[CouchbaseSpatialView("by_location", "geo.lng", 0)]
 		public float Longitude { get; set; }

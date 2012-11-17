@@ -32,8 +32,6 @@ namespace CouchbaseModelViews.Framework
 {
 	public class ViewBuilder
 	{
-		private const string VIEW_MAP_TEMPLATE = "function(doc, meta) {{ \r\n\t if ({0}) {{ \r\n\t\t emit({1}, {2}); \r\n\t }} \r\n }}";
-		private const string SPATIAL_VIEW_MAP_TEMPLATE = "function (doc, meta) {{ if ({0}) {{ emit({{ \"type\": \"Point\", \"coordinates\": {1}}}, null); }} }}";
 
 		private IList<Assembly> _assemblies = new List<Assembly>();
 		private IDictionary<string, string> _designDocs = new Dictionary<string, string>();
@@ -84,6 +82,8 @@ namespace CouchbaseModelViews.Framework
 					//get all view definition
 					designDocDefinition.ShouldIncludeAllView = type.GetCustomAttributes(true).Where(a => a is CouchbaseAllView).FirstOrDefault() != null;
 
+					handleViews<CouchbaseCollatedViewKeyAttribute>(typeName, designDoc, type, designDocDefinition);
+
 					handleViews<CouchbaseViewKeyAttribute>(typeName, designDoc, type, designDocDefinition);
 
 					handleViews<CouchbaseSpatialViewKeyAttribute>(typeName, designDoc, type, designDocDefinition);
@@ -112,7 +112,22 @@ namespace CouchbaseModelViews.Framework
 					orderedViewNames.Add(Tuple.Create(propName, attr));
 
 					//TODO: refactor the copy & paste
-					if (typeof(T).IsAssignableFrom(typeof(CouchbaseViewKeyAttribute)))
+					if (typeof(T).IsAssignableFrom(typeof(CouchbaseCollatedViewKeyAttribute)))
+					{
+						if (designDocDefinition.CollatedViews.FirstOrDefault(v => v.Name == attr.ViewName) == null)
+						{
+							var collatedAttr = attr as CouchbaseCollatedViewKeyAttribute;
+							var cvd = new CollatedViewDefinition()
+								{
+									Name = collatedAttr.ViewName,
+									RelationName = collatedAttr.RelationName,
+									RelationKeyPropertyName = collatedAttr.RelationPropertyName
+								};
+							cvd.KeyProperties.Add(attr.PropertyName);
+							designDocDefinition.CollatedViews.Add(cvd);
+						}
+					}
+					else if (typeof(T).IsAssignableFrom(typeof(CouchbaseViewKeyAttribute)))
 					{
 						if (designDocDefinition.Views.FirstOrDefault(v => v.Name == attr.ViewName) == null)
 						{
@@ -172,7 +187,7 @@ namespace CouchbaseModelViews.Framework
 			if (designDocDefinition.ShouldIncludeAllView)
 			{
 				var map = new JObject();
-				map["map"] = getViewFunction(designDocDefinition.Type, new List<string> { "null" }, VIEW_MAP_TEMPLATE);
+				map["map"] = getViewFunction(designDocDefinition.Type, new List<string> { "null" }, ViewTemplates.VIEW_MAP_TEMPLATE);
 				jObject["views"]["all"] = map;
 			}
 
@@ -194,11 +209,11 @@ namespace CouchbaseModelViews.Framework
 							break;
 					}
 
-					mapReduce["map"] = getViewFunction(designDocDefinition.Type, view.KeyProperties, VIEW_MAP_TEMPLATE, "doc.", view.Value);
+					mapReduce["map"] = getViewFunction(designDocDefinition.Type, view.KeyProperties, ViewTemplates.VIEW_MAP_TEMPLATE, "doc.", view.Value);
 				}
 				else
 				{
-					mapReduce["map"] = getViewFunction(designDocDefinition.Type, view.KeyProperties, VIEW_MAP_TEMPLATE, "doc.");
+					mapReduce["map"] = getViewFunction(designDocDefinition.Type, view.KeyProperties, ViewTemplates.VIEW_MAP_TEMPLATE, "doc.");
 				}
 
 				jObject["views"][view.Name] = mapReduce;
@@ -207,14 +222,33 @@ namespace CouchbaseModelViews.Framework
 
 			foreach (var view in designDocDefinition.SpatialViews)
 			{
-				var func = getViewFunction(designDocDefinition.Type, view.CoordinateProperties, SPATIAL_VIEW_MAP_TEMPLATE, "doc.");
+				var func = getViewFunction(designDocDefinition.Type, view.CoordinateProperties, ViewTemplates.SPATIAL_VIEW_MAP_TEMPLATE, "doc.");
 				jObject["spatial"][view.Name] = func;
+			}
+
+			foreach (var view in designDocDefinition.CollatedViews)
+			{
+				var keyStrings = getKeysToCheck(view.KeyProperties.Concat(new string[] { view.RelationKeyPropertyName }).ToList(), "doc.");
+				var map = new JObject();
+				map["map"] = string.Format(ViewTemplates.COLLATED_VIEW_MAP_TEMPLATE, designDocDefinition.Type, view.RelationName, 
+											keyStrings.Item1, keyStrings.Item2.Replace("[", "").Replace("]", ""));
+
+				jObject["views"][view.Name] = map;
 			}
 
 			_designDocs[designDocDefinition.Name] = jObject.ToString();
 		}
 
 		private string getViewFunction(string type, IList<string> values, string template, string docPrefix = null, string value = "null")
+		{
+			var keyReplacements = getKeysToCheck(values, docPrefix);
+
+			var condition = "doc.type == \"" + type + "\"";
+			if (docPrefix != null) condition += " && " + keyReplacements.Item1;
+			return string.Format(template, condition, keyReplacements.Item2, value);
+		}
+
+		private Tuple<string, string> getKeysToCheck(IList<string> values, string docPrefix = null)
 		{
 			var keysToEmit = "[{0}]";
 			var keysToCheck = "{0}";
@@ -232,9 +266,7 @@ namespace CouchbaseModelViews.Framework
 				keysToEmit = string.Format(keysToEmit, keys);
 			}
 
-			var condition = "doc.type == \"" + type + "\"";
-			if (docPrefix != null) condition += " && " + keysToCheck;
-			return string.Format(template, condition, keysToEmit, value);
+			return Tuple.Create(keysToCheck, keysToEmit);
 		}
 	}
 }

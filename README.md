@@ -33,6 +33,7 @@ the properties should be emitted.
     [CouchbaseAllView]
     public class Brewery
 	  {
+		[CouchbaseCollatedViewKey("all_with_beers", "beer", "name", "brewery_id")]
   		public string Id { get; set; }
   
   		[CouchbaseViewKey("by_name", "name")]

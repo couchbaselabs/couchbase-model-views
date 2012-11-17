@@ -23,33 +23,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CouchbaseModelViews.Framework.Attributes;
 
-namespace CouchbaseModelViews.DemoModels
+namespace CouchbaseModelViews.Framework
 {
-	[CouchbaseDesignDoc("breweries")]
-	[CouchbaseAllView]
-	public class Brewery 
+	public class CollatedViewDefinition : ViewDefinition
 	{
-		[CouchbaseCollatedViewKey("all_with_beers", "beer", "name", "brewery_id")]
-		public string Id { get; set; }
-		
-		[CouchbaseViewKey("by_name", "name")]
-		public string Name { get; set; }
+		public string RelationName { get; set; }
 
-		[CouchbaseViewKeySum("sum_by_state", "state")]
-		[CouchbaseViewKeyCount("count_by_state", "state", Order=0)]
-		public string State { get; set; }
-
-		[CouchbaseViewKeyCount("count_by_state", "city", Order = 1)]
-		public string City { get; set; }
-
-		public string Description { get; set; }
-
-		[CouchbaseSpatialViewKey("by_location", "geo.lng", 0)]
-		public float Longitude { get; set; }
-
-		[CouchbaseSpatialViewKey("by_location", "geo.lat", 1)]
-		public float Latitude { get; set; }
+		public string RelationKeyPropertyName { get; set; }
 	}
 }

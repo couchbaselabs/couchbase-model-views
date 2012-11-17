@@ -56,5 +56,12 @@ namespace CouchbaseModelViews.Framework
 		/// List of spatial view names and coordinate properties
 		/// </summary>
 		public IList<SpatialViewDefinition> SpatialViews { get { return _spatialViews; } }
+
+		private List<CollatedViewDefinition> _collatedViews = new List<CollatedViewDefinition>();
+
+		/// <summary>
+		/// List of spatial view names and coordinate properties
+		/// </summary>
+		public IList<CollatedViewDefinition> CollatedViews { get { return _collatedViews; } }
 	}
 }

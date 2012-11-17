@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\CouchbaseCollatedViewKeyAttribute.cs" />
     <Compile Include="Attributes\CouchbaseDesignDocAttribute.cs" />
     <Compile Include="Attributes\CouchbaseAllView.cs" />
     <Compile Include="Attributes\CouchbaseViewKeyCountAttribute.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="Attributes\CouchbaseViewKeyAttribute.cs" />
     <Compile Include="Attributes\CouchbaseViewKeyAttributeBase.cs" />
     <Compile Include="Attributes\CouchbaseViewKeySumAttribute.cs" />
+    <Compile Include="CollatedViewDefinition.cs" />
     <Compile Include="ConfigParser.cs" />
     <Compile Include="Attributes\CouchbaseViewKeyReduceAttributeBase.cs" />
     <Compile Include="DesignDocFileManager.cs" />
@@ -71,6 +73,7 @@
     <Compile Include="DesignDocDefinition.cs" />
     <Compile Include="ViewDefinition.cs" />
     <Compile Include="ViewRunner.cs" />
+    <Compile Include="ViewTemplates.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

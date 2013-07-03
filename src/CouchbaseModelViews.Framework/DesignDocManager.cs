@@ -32,9 +32,9 @@ namespace CouchbaseModelViews.Framework
 {
 	public class DesignDocManager
 	{
-		private static CouchbaseClientSection _config;
+		private static ICouchbaseClientConfiguration _config;
 		private static CouchbaseCluster _cluster;
-		
+
 		public DesignDocManager(string sectionName = "couchbase")
 		{
 			if (_cluster == null)
@@ -48,6 +48,7 @@ namespace CouchbaseModelViews.Framework
 		{
 			if (_cluster == null)
 			{
+				_config = config;
 				_cluster = new CouchbaseCluster(config);
 			}
 		}
@@ -58,20 +59,20 @@ namespace CouchbaseModelViews.Framework
 
 			try
 			{
-				_cluster.RetrieveDesignDocument(_config.Servers.Bucket, designDocName);
+				_cluster.RetrieveDesignDocument(_config.Bucket, designDocName);
 			}
 			catch (WebException ex)
 			{
 				if (!ex.Message.Contains("404")) throw ex;
 				//Do nothing on 404
 			}
-			
+
 			if (!string.IsNullOrEmpty(doc))
 			{
-				_cluster.DeleteDesignDocument(_config.Servers.Bucket, designDocName);
+				_cluster.DeleteDesignDocument(_config.Bucket, designDocName);
 			}
 
-			_cluster.CreateDesignDocument(_config.Servers.Bucket, designDocName, designDoc);
+			_cluster.CreateDesignDocument(_config.Bucket, designDocName, designDoc);
 
 			if (callback != null) callback(designDocName);
 		}
@@ -82,6 +83,6 @@ namespace CouchbaseModelViews.Framework
 			{
 				Create(key, designDocs[key], callback);
 			}
-		}		
+		}
 	}
 }

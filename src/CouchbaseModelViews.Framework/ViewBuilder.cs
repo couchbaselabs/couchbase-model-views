@@ -245,7 +245,7 @@ namespace CouchbaseModelViews.Framework
 
 			var condition = "doc.type == \"" + type + "\"";
 			if (docPrefix != null) condition += " && " + keyReplacements.Item1;
-			return string.Format(template, condition, keyReplacements.Item2, value);
+			return string.Format(template.Replace("\r", ""), condition, keyReplacements.Item2, value);
 		}
 
 		private Tuple<string, string> getKeysToCheck(IList<string> values, string docPrefix = null)
